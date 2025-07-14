@@ -8,3 +8,15 @@ Machine Learning & NLP Project
 - Tested the model for real-world applications, mimicking functionalities of advanced language detection systems.  
 - Tools & Technologies: Python, Scikit-learn, NLP (CountVectorizer), Naive Bayes, Pandas, NumPy, Matplotlib. 
 # DataScience1
+Objective:
+To uncover actionable insights and predictive trends in the food and restaurant sector using Zomato's dataset, enhancing decision-making for consumers and businesses alike.
+
+🛠️ Data Collection & Preprocessing
+- Acquired and cleaned a comprehensive Zomato dataset using Python (Pandas, NumPy) and SQL.
+- Standardized missing data, encoded categorical variables, and normalized features to prep for analysis and modeling.
+🔍 Exploratory Data Analysis (EDA)
+- Conducted in-depth EDA to identify high-rated cuisines, pricing patterns, and geographic concentration of restaurants.
+- Detected outliers and unusual rating distributions using statistical plots and logical checks.
+📈 Data Visualization
+- Created compelling visualizations using Matplotlib and Seaborn to highlight trends like delivery frequency, cost vs rating, and cuisine popularity.
+- Mapped restaurant density across cities with heatmaps to showcase regional preferences.
