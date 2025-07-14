@@ -20,3 +20,7 @@ To uncover actionable insights and predictive trends in the food and restaurant 
 📈 Data Visualization
 - Created compelling visualizations using Matplotlib and Seaborn to highlight trends like delivery frequency, cost vs rating, and cuisine popularity.
 - Mapped restaurant density across cities with heatmaps to showcase regional preferences.
+# SUPERDASHBOARD
+Utilized advanced data analysis techniques, with a focus on time series analysis, to extract valuable insights
+using PowerBI .Developed accurate sales forecasting models to support strategic business decisions.Created
+interactive dashboards to visualize data and drive business success.
