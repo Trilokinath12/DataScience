@@ -7,4 +7,4 @@ Machine Learning & NLP Project
 - Executed a full project pipeline: data preparation, model design, training, and evaluation, ensuring robust performance in real-time language detection.  
 - Tested the model for real-world applications, mimicking functionalities of advanced language detection systems.  
 - Tools & Technologies: Python, Scikit-learn, NLP (CountVectorizer), Naive Bayes, Pandas, NumPy, Matplotlib. 
-#DataScience1
+# DataScience1
