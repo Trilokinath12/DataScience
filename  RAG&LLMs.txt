@@ -1,0 +1,167 @@
+0. Introduction to LLMs and RAG
+# 🧠 Large Language Models & Retrieval-Augmented Generation
+
+**LLMs** are deep learning models trained on massive text corpora. They can:
+- Generate fluent responses
+- Summarize, translate, or classify text
+- Support complex tasks like coding or reasoning
+
+**RAG** combines LLMs with external knowledge retrieval:
+- Retrieves documents from a knowledge base
+- Feeds relevant chunks into the LLM for context-aware generation
+
+This notebook covers:
+1. LLM loading and text generation
+2. Tokenization and model architecture
+3. Retrieval tools and embeddings
+4. RAG pipeline for answering queries
+5. Evaluation and customization
+
+
+
+📦 1. Load an LLM with Hugging Face 🤗
+!pip install transformers accelerate
+
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+
+model_name = "mistralai/Mistral-7B-Instruct-v0.2"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
+
+text_gen = pipeline("text-generation", model=model, tokenizer=tokenizer)
+
+
+## 🔌 Loading Pretrained LLM
+
+We use Hugging Face to load a pretrained LLM.
+- `AutoTokenizer`: Handles tokenization rules specific to the model
+- `AutoModelForCausalLM`: Loads a text-generation-capable model
+- `pipeline`: Creates a high-level interface for generation tasks
+
+
+
+✏️ 2. Generate Text with the Model
+prompt = "Explain why the sky is blue in scientific terms."
+response = text_gen(prompt, max_new_tokens=150, temperature=0.7)
+print(response[0]["generated_text"])
+
+
+## ✏️ Text Generation
+
+Generation parameters:
+- `temperature`: controls randomness (lower = more conservative)
+- `max_new_tokens`: controls length of output
+
+Try varying the prompt and tuning generation settings.
+
+
+
+🧪 3. Tokenization and Model Internals
+tokens = tokenizer(prompt, return_tensors="pt")
+print(f"Token IDs: {tokens['input_ids']}")
+print(f"Decoded: {tokenizer.decode(tokens['input_ids'][0])}")
+
+
+## 🧪 Tokenization
+
+LLMs operate on tokens — subword pieces of text.
+- Tokenizers split input text into numerical IDs
+- Model processes these IDs during inference
+
+Understanding this helps debug input-output mismatches.
+
+
+
+🔍 4. RAG Setup with LangChain or Haystack
+## 🔍 What is RAG?
+
+Traditional LLMs rely on training data. RAG boosts accuracy using **retrieved external documents**.
+Steps:
+1. Embed user query
+2. Retrieve relevant text chunks (from vector DB or corpus)
+3. Combine retrieved chunks + user query
+4. Pass combined prompt into the LLM
+
+This lets the model answer with **real-time knowledge** or domain-specific insights.
+
+
+
+🗂️ 5. Embeddings and Vector Store Setup
+!pip install sentence-transformers faiss-cpu
+
+from sentence_transformers import SentenceTransformer
+import faiss
+
+embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+documents = ["Deep learning is a subset of machine learning.",
+             "PyTorch is an open-source ML framework.",
+             "The Earth orbits the Sun."]
+
+# Embed and index
+embeddings = embed_model.encode(documents)
+index = faiss.IndexFlatL2(len(embeddings[0]))
+index.add(embeddings)
+
+
+## 🧬 Embeddings + FAISS Index
+
+Embedding converts text → numerical vectors representing semantic meaning.
+
+**FAISS** is a fast vector search library:
+- `IndexFlatL2`: Computes similarity using Euclidean distance
+- You can use cosine or HNSW indexes for optimization
+
+
+
+🤖 6. RAG Query and Response Flow
+query = "What is PyTorch?"
+query_vec = embed_model.encode([query])
+D, I = index.search(query_vec, k=1)
+retrieved_chunk = documents[I[0][0]]
+
+combined_prompt = f"Context: {retrieved_chunk}\n\nQuestion: {query}\nAnswer:"
+response = text_gen(combined_prompt, max_new_tokens=100)
+print(response[0]['generated_text'])
+
+
+## 🤖 Query Augmentation
+
+We combine retrieved content with the question:
+- Improves factual correctness
+- Adds domain context
+- Boosts traceability for users
+
+Try adding multiple chunks or changing formatting style.
+
+
+
+📊 7. Evaluation: Accuracy and Relevance
+## 📊 Evaluation Strategies
+
+For RAG, evaluate on:
+- **Answer correctness** (compare to ground truth)
+- **Relevance of retrieved content** (manual or semantic metrics)
+- **Latency/performance**
+
+Tools:
+- `evaluate` or `datasets` from Hugging Face
+- Custom scoring functions
+
+
+
+🎯 8. Hyperparameter Tuning and Prompt Templates
+## 🎯 Customize prompts and tune generation
+
+Experiment with:
+- Temperature, top-k, top-p
+- Chunk formatting and separators
+- Multi-query retrieval (expand queries before retrieval)
+
+Use prompt templates for domain adaptation:
+```python
+def format_prompt(context, query):
+    return f"Given the following context:\n{context}\nAnswer the question:\n{query}"
+
+
+
+
