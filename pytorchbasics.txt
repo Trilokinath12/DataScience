@@ -1,0 +1,179 @@
+0. Introduction to PyTorch
+# 📘 Introduction to PyTorch
+
+PyTorch is an open-source deep learning framework known for:
+- Dynamic computation graphs
+- Strong GPU support
+- Flexibility for research and production
+
+This notebook covers:
+1. Tensor operations and gradients
+2. Defining custom models (estimators)
+3. Preprocessing data
+4. Creating training pipelines
+5. Model evaluation
+6. Hyperparameter tuning with Optuna
+
+
+
+🔢 1. Tensor Basics
+import torch
+import numpy as np
+
+# Create various types of tensors
+scalar = torch.tensor(3.0)
+vector = torch.tensor([1.0, 2.0])
+matrix = torch.rand(2, 3)
+
+# Operations
+sum_vector = vector + torch.ones(2)
+reshaped = matrix.view(3, 2)
+matmul = torch.matmul(torch.rand(2, 3), torch.rand(3, 4))
+
+# NumPy bridge
+np_array = vector.numpy()
+back_to_tensor = torch.from_numpy(np_array)
+
+# GPU transfer
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+tensor_gpu = vector.to(device)
+
+
+## 🔢 Tensor Basics
+
+Tensors are multi-dimensional arrays used to represent inputs, weights, and outputs.
+- You can create them like NumPy arrays but use `.to(device)` to utilize GPU acceleration.
+- Use `.view()`, `.reshape()`, and `.permute()` to manipulate shapes.
+
+
+
+⚙️ 2. Autograd & Gradients
+x = torch.tensor([2.0], requires_grad=True)
+y = x**3 + 2*x**2 + x
+y.backward()
+print(f"dy/dx: {x.grad}")
+
+
+## ⚙️ Autograd
+
+PyTorch uses dynamic computation graphs for automatic differentiation.
+- `requires_grad=True` activates gradient tracking.
+- Use `.backward()` to compute gradients.
+- Gradients are stored in `.grad` and used by optimizers.
+
+
+
+🔁 3. Defining Models (Estimators)
+import torch.nn as nn
+
+class SimpleModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.linear = nn.Linear(1, 1)
+
+    def forward(self, x):
+        return self.linear(x)
+
+model = SimpleModel()
+
+
+## 🔁 Estimators
+
+Models are defined as classes extending `nn.Module`.
+- They implement the `forward()` method for computation.
+- Layers (e.g., `nn.Linear`) are declared in `__init__`.
+
+
+
+🏗️ 4. Training Pipeline
+import torch.optim as optim
+
+# Synthetic Data
+X = torch.randn(100, 1)
+y = 3 * X + 0.5 * torch.randn(100, 1)
+
+# Move to GPU
+X, y = X.to(device), y.to(device)
+model.to(device)
+
+# Loss & Optimizer
+criterion = nn.MSELoss()
+optimizer = optim.SGD(model.parameters(), lr=0.01)
+
+# Training loop
+for epoch in range(100):
+    pred = model(X)
+    loss = criterion(pred, y)
+    
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+    if epoch % 10 == 0:
+        print(f"Epoch {epoch}: Loss = {loss.item():.4f}")
+
+
+## 🏗️ Training Pipeline
+
+This includes:
+- Forward pass (`model(X)`)
+- Loss computation (`MSELoss`)
+- Gradient computation (`loss.backward()`)
+- Weight update (`optimizer.step()`)
+
+
+
+📊 5. Evaluation
+model.eval()
+with torch.no_grad():
+    test_preds = model(X)
+    test_loss = criterion(test_preds, y)
+print(f"Test Loss: {test_loss.item():.4f}")
+
+
+## 📊 Evaluation
+
+Use `.eval()` to switch model to inference mode.
+Use `torch.no_grad()` to disable gradient tracking during evaluation.
+
+
+
+🎯 6. Hyperparameter Tuning with Optuna
+!pip install optuna
+
+
+import optuna
+
+def objective(trial):
+    lr = trial.suggest_float("lr", 1e-4, 1e-1, log=True)
+    model = SimpleModel().to(device)
+    optimizer = optim.SGD(model.parameters(), lr=lr)
+    criterion = nn.MSELoss()
+
+    for epoch in range(100):
+        pred = model(X)
+        loss = criterion(pred, y)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    return loss.item()
+
+study = optuna.create_study(direction="minimize")
+study.optimize(objective, n_trials=20)
+
+print("Best hyperparameters:", study.best_params)
+
+
+## 🎯 Hyperparameter Search with Optuna
+
+Optuna provides automated optimization:
+- Define an objective function
+- Suggest parameters (e.g., learning rate)
+- Run trials to minimize loss
+
+Use for tuning architecture, learning rates, or dropout values.
+
+
+
+

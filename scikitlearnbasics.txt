@@ -1,0 +1,131 @@
+ 0. Introduction to Scikit-learn
+# 🔍 Scikit-learn Fundamentals
+
+Scikit-learn is a powerful machine learning library in Python, built for:
+- Easy experimentation
+- Clean APIs for modeling, preprocessing, evaluation
+- Compatibility with NumPy and pandas
+
+This notebook covers:
+1. Estimators and Transformers
+2. Preprocessing tools
+3. Pipelines for workflow automation
+4. Model evaluation
+5. Hyperparameter tuning
+
+
+
+📦 1. Load Sample Dataset
+from sklearn.datasets import load_iris
+import pandas as pd
+
+# Load dataset
+data = load_iris()
+X = pd.DataFrame(data.data, columns=data.feature_names)
+y = pd.Series(data.target, name="target")
+
+X.head()
+
+
+
+🧠 2. Estimators & Transformers
+## 🧠 What are estimators?
+
+Scikit-learn estimators are any object that learns from data. They implement:
+- `.fit()` → Train on data
+- `.predict()` → Generate predictions (for supervised models)
+- `.transform()` → Modify data (for transformers)
+
+Let's try a basic classifier.
+
+
+from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression()
+model.fit(X, y)
+predictions = model.predict(X)
+
+predictions[:5]
+
+
+
+🧼 3. Preprocessing and Transformers
+## 🧼 Data Preprocessing with Transformers
+
+Transformers apply operations like scaling, imputation, encoding:
+- `.fit()` → learn transformation parameters
+- `.transform()` → apply changes to data
+- `.fit_transform()` → shortcut for both steps
+
+
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+pd.DataFrame(X_scaled, columns=X.columns).head()
+
+
+
+🔗 4. Pipelines for Clean Workflow
+## 🔗 Pipelines for Sequential Operations
+
+Pipelines combine multiple steps (transformers + models) into one object:
+- Cleaner code
+- Safer during grid search
+- Reusable across training/testing
+
+We'll create a pipeline with scaling + logistic regression.
+
+
+from sklearn.pipeline import Pipeline
+
+pipe = Pipeline([
+    ('scaler', StandardScaler()),
+    ('logreg', LogisticRegression())
+])
+
+pipe.fit(X, y)
+pipe.predict(X[:5])
+
+
+
+📊 5. Model Evaluation
+## 📊 Model Evaluation
+
+Scikit-learn offers metrics like accuracy, precision, recall, F1, and cross-validation tools.
+
+
+from sklearn.model_selection import cross_val_score
+
+scores = cross_val_score(pipe, X, y, cv=5, scoring='accuracy')
+print(f"Cross-validated accuracy scores: {scores}")
+print(f"Mean accuracy: {scores.mean():.4f}")
+
+
+
+🎯 6. Hyperparameter Tuning (Grid Search)
+## 🎯 Hyperparameter Search with GridSearchCV
+
+GridSearchCV automates parameter testing:
+- Tries combinations using cross-validation
+- Returns best model and score
+
+Let's tune regularization `C` and solver for Logistic Regression.
+
+
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    'logreg__C': [0.01, 0.1, 1, 10],
+    'logreg__solver': ['lbfgs', 'liblinear']
+}
+
+grid_search = GridSearchCV(pipe, param_grid, cv=5, scoring='accuracy')
+grid_search.fit(X, y)
+
+print("Best Parameters:", grid_search.best_params_)
+print("Best Score:", grid_search.best_score_)
+
+
+
+
